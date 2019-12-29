@@ -27,7 +27,7 @@ int main(){
                 fgetc(inFile);
 	}
 	
-	printf("#ifndef ALPHABET_H\n#define ALPHABET_H\n\nstruct point{const int x; const int y;};\nstruct character{const char* name; const struct point* data;};\n\n");
+	printf("#ifndef ALPHABET_H\n#define ALPHABET_H\n#include <string.h>\n#include <stdlib.h>\nconst int WIDTH = %d;\nconst int HEIGHT = %d;\nstruct point{const int x; const int y;};\nstruct character{const char* name; const struct point* data; const int data_length;};\n\n", font_width, font_height);
 	for(int i = 0; i < symbols; ++i) {
 		fgets(line, 30, signFile);
 		line[strlen(line)-1]=0;
@@ -39,10 +39,10 @@ int main(){
 				if(a[x+k][y+j]) printf("{%d,%d},", k, j); 
 		printf("};\n");
 	}
-	printf("\nconst struct character alphabet[]={\n");
+	printf("\nstruct character alphabet[]={\n");
 	for(int i = 0; i < symbols; ++i) {
-		printf("{n__%d, p__%d},\n", i, i);
+		printf("{n__%d, p__%d, sizeof(p__%d)/sizeof(struct point)},\n", i, i, i);
 	}
-	printf("};\n#endif\n");
+	printf("};\nint m_cmp(const void* a, const void* b){\n    return strcmp(*(const char**)a, *(const char**)b);\n}\n\nchar sorted = 0;\nvoid init_data(){\n    qsort(alphabet, sizeof(alphabet)/sizeof(struct character), sizeof(struct character), m_cmp);\n    sorted = 1;\n}\nstruct character* get_data(const char* str){\n    if(!sorted)init_data();\n    return bsearch(&str, alphabet, sizeof(alphabet)/sizeof(struct character), sizeof(struct character), m_cmp);\n}\n#endif\n");
 	return fclose(signFile) && fclose(inFile);
 }
