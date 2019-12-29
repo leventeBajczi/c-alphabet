@@ -1,0 +1,48 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+const char* const tga = "font.tga";
+const char* const signs = "signs.txt";
+
+int main(){
+	int font_width, font_height, font_v_spacer, font_h_spacer, tga_width, tga_pre, tga_height, symbols;
+	FILE* inFile = fopen(tga, "rb");
+	FILE* signFile = fopen(signs, "rb");
+	char line[30];
+	fgets(line, 30, signFile);
+	sscanf(line, "%d %d %d %d", &font_width, &font_height, &font_v_spacer, &font_h_spacer);
+	fgets(line, 30, signFile);
+	sscanf(line, "%d %d %d", &tga_pre, &tga_width, &tga_height);
+	fgets(line, 30, signFile);
+	symbols = atoi(line);
+
+	char a[tga_width][tga_height];
+	for(int i = 0; i<tga_pre; ++i) fgetc(inFile);
+	for(int i = 0; i<tga_width*tga_height; ++i) {
+		if(fgetc(inFile) == 0) a[i%tga_width][tga_height-i/tga_width] = 1;
+		else a[i%tga_width][tga_height-i/tga_width] = 0;
+                fgetc(inFile);
+                fgetc(inFile);
+                fgetc(inFile);
+	}
+	
+	printf("#ifndef ALPHABET_H\n#define ALPHABET_H\n\nstruct point{const int x; const int y;};\nstruct character{const char* name; const struct point* data;};\n\n");
+	for(int i = 0; i < symbols; ++i) {
+		fgets(line, 30, signFile);
+		line[strlen(line)-1]=0;
+		printf("const char n__%d[]=\"%s\";\nconst struct point p__%d[]={", i, line, i);
+		int x = i%16 * (font_width + font_h_spacer);
+		int y = i/16 * (font_height + font_v_spacer);
+		for(int j = 0; j < font_height; ++j)
+			for(int k = 0; k < font_width; ++k)
+				if(a[x+k][y+j]) printf("{%d,%d},", k, j); 
+		printf("};\n");
+	}
+	printf("\nconst struct character alphabet[]={\n");
+	for(int i = 0; i < symbols; ++i) {
+		printf("{n__%d, p__%d},\n", i, i);
+	}
+	printf("};\n#endif\n");
+	return fclose(signFile) && fclose(inFile);
+}
