@@ -20,8 +20,8 @@ int main(){
 	char a[tga_width][tga_height];
 	for(int i = 0; i<tga_pre; ++i) fgetc(inFile);
 	for(int i = 0; i<tga_width*tga_height; ++i) {
-		if(fgetc(inFile) == 0) a[i%tga_width][tga_height-i/tga_width] = 1;
-		else a[i%tga_width][tga_height-i/tga_width] = 0;
+		if(fgetc(inFile) == 0) a[i%tga_width][tga_height-1-i/tga_width] = 1;
+		else a[i%tga_width][tga_height-1-i/tga_width] = 0;
                 fgetc(inFile);
                 fgetc(inFile);
                 fgetc(inFile);
@@ -43,6 +43,6 @@ int main(){
 	for(int i = 0; i < symbols; ++i) {
 		printf("{n__%d, p__%d, sizeof(p__%d)/sizeof(struct point)},\n", i, i, i);
 	}
-	printf("};\nint m_cmp(const void* a, const void* b){\n    return strcmp(*(const char**)a, *(const char**)b);\n}\n\nchar sorted = 0;\nvoid init_data(){\n    qsort(alphabet, sizeof(alphabet)/sizeof(struct character), sizeof(struct character), m_cmp);\n    sorted = 1;\n}\nstruct character* get_data(const char* str){\n    if(!sorted)init_data();\n    return bsearch(&str, alphabet, sizeof(alphabet)/sizeof(struct character), sizeof(struct character), m_cmp);\n}\n#endif\n");
+	printf("};\nint m_cmp(const void* a, const void* b){\n    return strcmp(*(const char**)a, *(const char**)b);\n}\n\nchar sorted = 0;\nvoid init_data(){\n    qsort(alphabet, sizeof(alphabet)/sizeof(struct character), sizeof(struct character), m_cmp);\n    sorted = 1;\n}\nstruct character* get_data(const char* str){\n    if(!sorted)init_data();\n    return (struct character*)bsearch(&str, alphabet, sizeof(alphabet)/sizeof(struct character), sizeof(struct character), m_cmp);\n}\n#endif\n");
 	return fclose(signFile) && fclose(inFile);
 }
